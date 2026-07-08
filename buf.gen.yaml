@@ -1,0 +1,10 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/salimnassim/dfhack/gen/proto
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.6
+    out: gen/proto
+    opt: paths=source_relative
