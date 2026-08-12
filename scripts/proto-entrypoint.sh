@@ -1,24 +1,7 @@
 #!/usr/bin/env bash
-# downloads DFHack protobuf definitions from the latest release and
-# generates Go bindings using bufbuild/buf
-#
-# DFHACK_VERSION=53.15-r1 ./scripts/generate-proto.sh
-
 set -euo pipefail
 
 REPO="DFHack/dfhack"
-BUF_IMAGE="bufbuild/buf:latest"
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-cd "${ROOT_DIR}"
-
-for cmd in curl jq tar docker; do
-  if ! command -v "${cmd}" >/dev/null 2>&1; then
-    echo "error: required command '${cmd}' not found on PATH" >&2
-    exit 1
-  fi
-done
 
 TAG="${DFHACK_VERSION:-}"
 if [[ -z "${TAG}" ]]; then
@@ -41,20 +24,12 @@ echo "extracting tarball"
 tar -xzf "${TMP_DIR}/dfhack-src.tar.gz" -C "${TMP_DIR}" --strip-components=1
 
 echo "staging for buf"
-rm -rf proto/library proto/plugins
 mkdir -p proto/library proto/plugins
+rm -f proto/library/*.proto proto/plugins/*.proto
 cp "${TMP_DIR}"/library/proto/*.proto proto/library/
 cp "${TMP_DIR}"/plugins/proto/*.proto proto/plugins/
 
-echo "generating with ${BUF_IMAGE}"
-docker run --rm \
-  --env HOME=/tmp \
-  --volume "${ROOT_DIR}:/workspace" \
-  --workdir /workspace \
-  "${BUF_IMAGE}" generate
-
-if command -v go >/dev/null 2>&1; then
-  go mod tidy
-fi
+echo "generating with buf"
+buf generate
 
 echo "done"
