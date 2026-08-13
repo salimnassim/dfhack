@@ -9,6 +9,7 @@ import (
 	"net"
 
 	pb "github.com/salimnassim/dfhack/gen/proto"
+	"golang.org/x/text/encoding/charmap"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -157,6 +158,12 @@ func (c *Client) readReply(out proto.Message) error {
 				if err := proto.Unmarshal(body, note); err != nil {
 					return fmt.Errorf("unmarshal text notification: %w", err)
 				}
+				for _, frag := range note.Fragments {
+					if frag.Text != nil {
+						decoded := decodeCP437(*frag.Text)
+						frag.Text = &decoded
+					}
+				}
 				if c.OnText != nil {
 					c.OnText(note)
 				}
@@ -170,6 +177,16 @@ func (c *Client) readReply(out proto.Message) error {
 			return fmt.Errorf("unexpected reply id %d", id)
 		}
 	}
+}
+
+var cp437Decoder = charmap.CodePage437.NewDecoder()
+
+func decodeCP437(s string) string {
+	out, err := cp437Decoder.String(s)
+	if err != nil {
+		return s
+	}
+	return out
 }
 
 type RPCError struct {
