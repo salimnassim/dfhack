@@ -45,6 +45,7 @@ type Client struct {
 	OnText func(*pb.CoreTextNotification)
 }
 
+// Dial opens a TCP connection to addr and performs the DFHack handshake.
 func Dial(ctx context.Context, addr string) (*Client, error) {
 	var d net.Dialer
 	conn, err := d.DialContext(ctx, "tcp", addr)
@@ -89,6 +90,7 @@ func (c *Client) Close() error {
 	return c.conn.Close()
 }
 
+// Bind resolves a plugin-provided RPC method name to a numeric ID for use with Call.
 func (c *Client) Bind(method, plugin string, in, out proto.Message) (int16, error) {
 	req := &pb.CoreBindRequest{
 		Method:    new(method),
@@ -106,6 +108,7 @@ func (c *Client) Bind(method, plugin string, in, out proto.Message) (int16, erro
 	return int16(reply.GetAssignedId()), nil
 }
 
+// Call sends in as the request body for method id and decodes the reply into out.
 func (c *Client) Call(id int16, in, out proto.Message) error {
 	if err := c.writeMessage(id, in); err != nil {
 		return err
@@ -189,6 +192,7 @@ func decodeCP437(s string) string {
 	return out
 }
 
+// RPCError reports a replyFail response, wrapping the DFHack error code.
 type RPCError struct {
 	Code pb.CoreErrorNotification_ErrorCode
 }
