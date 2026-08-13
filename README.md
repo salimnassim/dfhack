@@ -77,6 +77,42 @@ the DOS CP437 codepage rather than UTF-8. The client transparently decodes
 accented and special characters (e.g. `é`) print correctly instead of showing
 up as `�` or `?`.
 
+```
+$ go run cmd/command.go --command instruments
+shigós (handheld, WOODCRAFT/assemble)
+  make shigós keyboard (GLASSMAKER: sand, sand bag)
+  make shigós body (WOODCRAFT: wood)
+  make shigós bellows (LEATHERWORK: leather)
+
+zasgim (handheld, STONECRAFT/assemble)
+  make zasgim yoke (BONECARVE: bone)
+  make zasgim sound-chest (STONECRAFT: stone)
+  make zasgim strings (WEAVING: silk thread)
+  make zasgim bow (BONECARVE: bone)
+
+eststek (handheld, STONECRAFT: stone)
+
+gethust (handheld, POTTERY/assemble)
+  make gethust blowpipe (WOODCRAFT: wood)
+  make gethust wind chest (POTTERY: clay)
+  make gethust pipe (POTTERY: clay)
+
+ubur (handheld, GLASSMAKER: sand, sand bag)
+
+kikës (building, METALCRAFT/assemble)
+  forge kikës triangles (METALCRAFT: metal bars)
+  make kikës stand (STONECRAFT: stone)
+
+thortith (building, BONECARVE/assemble)
+  make thortith bowls (BONECARVE: bone)
+  forge thortith stand (METALCRAFT: metal bars)
+  make thortith stick (WOODCRAFT: wood)
+
+unib (building, POTTERY: clay)
+
+dakas (building, CARPENTRY: wood)
+```
+
 ### Calling a plugin RPC method
 
 Plugin-provided methods must be bound to an ID before use with `Client.Bind`, then invoked with `Client.Call` using that ID:
