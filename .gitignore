@@ -30,8 +30,3 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
-
-proto/library/*.proto
-proto/plugins/*.proto
-
-gen/proto/*.go
