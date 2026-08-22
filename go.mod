@@ -1,7 +1,8 @@
 module github.com/salimnassim/dfhack
 
-go 1.26.5
+go 1.27.0
 
-require google.golang.org/protobuf v1.36.12
-
-require golang.org/x/text v0.41.0
+require (
+	golang.org/x/text v0.41.0
+	google.golang.org/protobuf v1.36.12
+)
