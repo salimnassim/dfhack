@@ -33,7 +33,6 @@ import (
 
 	"github.com/salimnassim/dfhack/client"
 	pb "github.com/salimnassim/dfhack/gen/proto"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
@@ -49,15 +48,12 @@ func main() {
 	// Streamed text output (e.g. command output) arrives via OnText.
 	c.OnText = func(n *pb.CoreTextNotification) {
 		for _, fragment := range n.GetFragments() {
-			fmt.Println(fragment.GetText())
+			fmt.Print(fragment.GetText())
 		}
 	}
 
-	cmd := &pb.CoreRunCommandRequest{
-		Command:   proto.String("ls"),
-		Arguments: nil,
-	}
-	if err := c.Call(client.RunCommandID, cmd, &pb.EmptyMessage{}); err != nil {
+	cmd := &pb.CoreRunCommandRequest{Command: new("ls")}
+	if err := c.Call(ctx, client.RunCommandID, cmd, &pb.EmptyMessage{}); err != nil {
 		slog.Error("command failed", "error", err)
 	}
 }
@@ -68,6 +64,12 @@ A runnable version of this is in [`cmd/command.go`](cmd/command.go):
 ```sh
 go run ./cmd -addr 127.0.0.1:5000 -command ls
 ```
+
+Every `Call` and `Bind` takes a `context.Context`; cancelling it or passing its
+deadline aborts the in-flight request. After a transport or framing error
+(including a cancelled request) the connection's stream position is unknown, so
+all later calls on that `Client` fail with the same error — `Dial` a new one.
+A server-side failure (`*client.RPCError`) does not break the connection.
 
 ### Text encoding
 
@@ -118,13 +120,13 @@ dakas (building, CARPENTRY: wood)
 Plugin-provided methods must be bound to an ID before use with `Client.Bind`, then invoked with `Client.Call` using that ID:
 
 ```go
-id, err := c.Bind("SomeMethod", "someplugin", &pb.SomeMethodIn{}, &pb.SomeMethodOut{})
+id, err := c.Bind(ctx, "SomeMethod", "someplugin", &pb.SomeMethodIn{}, &pb.SomeMethodOut{})
 if err != nil {
 	// handle error
 }
 
 out := &pb.SomeMethodOut{}
-if err := c.Call(id, &pb.SomeMethodIn{ /* ... */ }, out); err != nil {
+if err := c.Call(ctx, id, &pb.SomeMethodIn{ /* ... */ }, out); err != nil {
 	// handle error
 }
 ```
